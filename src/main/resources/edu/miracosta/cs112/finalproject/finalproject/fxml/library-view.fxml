@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/24"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="edu.miracosta.cs112.finalproject.finalproject.controller.LibraryController">
+
+    <top>
+        <HBox spacing="10" padding="10">
+            <TextField fx:id="searchField"
+                       promptText="Search by title or console…"
+                       HBox.hgrow="ALWAYS"/>
+            <Button text="Add"    onAction="#onAddGame"/>
+            <Button text="Edit"   fx:id="editButton"
+                    onAction="#onEditGame"
+                    disable="true"/>
+            <Button text="Delete" fx:id="deleteButton"
+                    onAction="#onDeleteGame"
+                    disable="true"/>
+        </HBox>
+    </top>
+
+    <center>
+        <TableView fx:id="gameTable">
+            <columns>
+                <TableColumn fx:id="titleColumn"        text="Title"          prefWidth="150"/>
+                <TableColumn fx:id="consoleColumn"      text="Console"        prefWidth="100"/>
+                <TableColumn fx:id="genresColumn"       text="Genres"         prefWidth="150"/>
+                <TableColumn fx:id="releaseDateColumn"  text="Release Date"   prefWidth="100"/>
+                <TableColumn fx:id="hoursPlayedColumn"  text="Hours Played"   prefWidth="100"/>
+                <TableColumn fx:id="completedColumn"    text="Completed"      prefWidth="80"/>
+                <TableColumn fx:id="completeCopyColumn" text="Complete Copy"  prefWidth="100"/>
+                <TableColumn fx:id="pricePaidColumn"    text="Price Paid"     prefWidth="80"/>
+                <TableColumn fx:id="marketValueColumn"  text="Market Value"   prefWidth="100"/>
+            </columns>
+        </TableView>
+    </center>
+
+</BorderPane>
