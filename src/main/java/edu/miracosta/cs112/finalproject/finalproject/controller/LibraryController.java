@@ -1,17 +1,25 @@
 package edu.miracosta.cs112.finalproject.finalproject.controller;
 
-import edu.miracosta.cs112.finalproject.finalproject.model.Game;
 import edu.miracosta.cs112.finalproject.finalproject.model.DigitalGame;
+import edu.miracosta.cs112.finalproject.finalproject.model.Game;
 import edu.miracosta.cs112.finalproject.finalproject.model.PhysicalGame;
+
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
-
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.scene.Parent;
+import javafx.stage.Window;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
+
 
 public class LibraryController {
 
@@ -32,8 +40,11 @@ public class LibraryController {
     private final ObservableList<Game> masterData   = FXCollections.observableArrayList();
     private       FilteredList<Game> filteredData;
 
+    public static LibraryController INSTANCE;
+
     @FXML
     public void initialize() {
+        INSTANCE = this;
         // 1) wire up columns
         titleColumn       .setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getTitle()));
         consoleColumn     .setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getConsole()));
@@ -100,19 +111,62 @@ public class LibraryController {
     }
 
     @FXML
-    private void onAddGame() {
-        // TODO: open your Add/Edit dialog
+    private void onAddGame() throws IOException {
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/fxml/game-form.fxml")
+        );
+        Parent pane = loader.load();            // ← load() returns a Parent (your GridPane)
+        FormController fc = loader.getController();
+
+        Stage dialog = new Stage();
+        dialog.initOwner(gameTable.getScene().getWindow());
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setScene(new Scene(pane));      // ← use pane here
+        fc.setDialogStage(dialog);
+
+        dialog.showAndWait();
+
+        Game newGame = fc.getGameResult();
+        if (newGame != null) {
+            masterData.add(newGame);
+        }
     }
 
     @FXML
-    private void onEditGame() {
-        // TODO: load selected Game into form
+    private void onEditGame() throws IOException {
+        Game sel = gameTable.getSelectionModel().getSelectedItem();
+        if (sel == null) return;
+
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/fxml/game-form.fxml")
+        );
+        Parent pane = loader.load();
+        FormController fc = loader.getController();
+
+        Stage dialog = new Stage();
+        dialog.initOwner(gameTable.getScene().getWindow());
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setScene(new Scene(pane));
+        fc.setDialogStage(dialog);
+        fc.setGame(sel);
+
+        dialog.showAndWait();
+        gameTable.refresh();
+
     }
+
+
 
     @FXML
     private void onDeleteGame() {
         Game sel = gameTable.getSelectionModel().getSelectedItem();
         if (sel != null) masterData.remove(sel);
     }
+
+    /** Allow external code to access the current game list. */
+    public ObservableList<Game> getMasterData() {
+        return masterData;
+    }
+
 }
 

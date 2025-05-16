@@ -1,23 +1,31 @@
 package edu.miracosta.cs112.finalproject.finalproject.model;
 
-
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import java.time.LocalDate;
 import java.util.List;
 import javafx.scene.image.Image;
 
-
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.CLASS,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "@class"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = DigitalGame.class),
+        @JsonSubTypes.Type(value = PhysicalGame.class)
+})
 public abstract class Game {
     private String title;
-    private String console;           // was “platform”
+    private String console;
     private List<String> genres;
     private LocalDate releaseDate;
     private String coverArtPath;
     private double hoursPlayed;
     private boolean completed;
-    private boolean completeCopy;     // has cover art & manual
+    private boolean completeCopy;
     private double pricePaid;
     private double marketValue;
-
 
     public Game(String title,
                 String console,
@@ -112,24 +120,27 @@ public abstract class Game {
         this.marketValue = marketValue;
     }
 
+
     public String getCoverArtPath() {
         return coverArtPath;
     }
 
+    public void setCoverArtPath(String coverArtPath) {
+        this.coverArtPath = coverArtPath;
+    }
+
+
 
     // ─── Shared Logic ──────────────────────────────────────
 
-    /** How much profit (or loss) you’d make if you sold this now. */
+    // How much profit (or loss) you’d make if you sold this now.
     public double getProfit() {
         return marketValue - pricePaid;
     }
 
     // ─── Abstract Hooks ────────────────────────────────────
 
-    /**
-     * Load the cover art image for UI display.
-     * You can use the coverArtPath here, e.g. new Image(coverArtPath).
-     */
+    // Load the cover art image for the UI display.
     public abstract Image loadCoverArt();
 }
 

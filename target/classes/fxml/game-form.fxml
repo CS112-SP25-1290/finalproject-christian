@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane xmlns="http://javafx.com/javafx/21"
+          xmlns:fx="http://javafx.com/fxml/1"
+          fx:controller="edu.miracosta.cs112.finalproject.finalproject.controller.FormController"
+          hgap="10" vgap="10"
+          style="-fx-padding: 10;">
+
+    <!-- Row 0 -->
+    <Label text="Title:"
+           GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+    <TextField fx:id="titleField"
+               GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+    <!-- Row 1 -->
+    <Label text="Console:"
+           GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+    <TextField fx:id="consoleField"
+               GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+    <!-- Row 2 -->
+    <Label text="Genres (comma):"
+           GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+    <TextField fx:id="genresField"
+               GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+    <!-- Row 3 -->
+    <Label text="Release Date:"
+           GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+    <DatePicker fx:id="releaseDatePicker"
+                GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+    <!-- Row 4 -->
+    <Label text="Hours Played:"
+           GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+    <Spinner fx:id="hoursSpinner"
+             GridPane.rowIndex="4" GridPane.columnIndex="1"
+             editable="true"
+             prefWidth="100">
+        <!-- CORRECTED: use valueFactory, not SpinnerValueFactory tag -->
+        <valueFactory>
+            <SpinnerValueFactory.DoubleSpinnerValueFactory
+                    min="0" max="10000" amountToStepBy="1"/>
+        </valueFactory>
+    </Spinner>
+
+    <!-- Row 5 -->
+    <Label text="Completed:"
+           GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+    <CheckBox fx:id="completedCheck"
+              GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+    <!-- Row 6 -->
+    <Label text="Complete Copy:"
+           GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+    <CheckBox fx:id="copyCheck"
+              GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+    <!-- Row 7 -->
+    <Label text="Cover Art Path:"
+           GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+    <HBox spacing="5"
+          GridPane.rowIndex="7" GridPane.columnIndex="1">
+        <TextField fx:id="coverPathField" HBox.hgrow="ALWAYS"/>
+        <Button text="Browse…" onAction="#onBrowseCover"/>
+    </HBox>
+
+    <!-- Row 8 -->
+    <Label text="Price Paid:"
+           GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+    <TextField fx:id="priceField"
+               GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+
+    <!-- Row 9 -->
+    <Label text="Market Value:"
+           GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+    <TextField fx:id="valueField"
+               GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+
+    <!-- Buttons Row -->
+    <HBox spacing="10" alignment="CENTER_RIGHT"
+          GridPane.rowIndex="10" GridPane.columnIndex="1">
+        <Button text="Save"   onAction="#onSave"/>
+        <Button text="Cancel" onAction="#onCancel"/>
+    </HBox>
+</GridPane>
+

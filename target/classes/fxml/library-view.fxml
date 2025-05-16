@@ -8,7 +8,7 @@
             fx:controller="edu.miracosta.cs112.finalproject.finalproject.controller.LibraryController">
 
     <top>
-        <HBox spacing="10" padding="10">
+        <HBox spacing="10" style="-fx-padding: 10;">
             <TextField fx:id="searchField"
                        promptText="Search by title or console…"
                        HBox.hgrow="ALWAYS"/>
@@ -33,7 +33,7 @@
                 <TableColumn fx:id="completedColumn"    text="Completed"      prefWidth="80"/>
                 <TableColumn fx:id="completeCopyColumn" text="Complete Copy"  prefWidth="100"/>
                 <TableColumn fx:id="pricePaidColumn"    text="Price Paid"     prefWidth="80"/>
-                <TableColumn fx:id="marketValueColumn"  text="Market Value"   prefWidth="100"/>
+                <TableColumn fx:id="marketValueColumn"  text="Price Charting Value"   prefWidth="100"/>
             </columns>
         </TableView>
     </center>
