@@ -23,7 +23,7 @@
                GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
     <!-- Row 2 -->
-    <Label text="Genres (comma):"
+    <Label text="Genre(s):"
            GridPane.rowIndex="2" GridPane.columnIndex="0"/>
     <TextField fx:id="genresField"
                GridPane.rowIndex="2" GridPane.columnIndex="1"/>
@@ -41,7 +41,6 @@
              GridPane.rowIndex="4" GridPane.columnIndex="1"
              editable="true"
              prefWidth="100">
-        <!-- CORRECTED: use valueFactory, not SpinnerValueFactory tag -->
         <valueFactory>
             <SpinnerValueFactory.DoubleSpinnerValueFactory
                     min="0" max="10000" amountToStepBy="1"/>
@@ -81,11 +80,19 @@
     <TextField fx:id="valueField"
                GridPane.rowIndex="9" GridPane.columnIndex="1"/>
 
-    <!-- Buttons Row -->
+    <!-- Row 10: Store URL -->
+<!--    <Label text="Store URL:"-->
+<!--           GridPane.rowIndex="10" GridPane.columnIndex="0"/>-->
+<!--    <TextField fx:id="storeUrlField"-->
+<!--               promptText="(leave empty for physical)"-->
+<!--               GridPane.rowIndex="10" GridPane.columnIndex="1"/>-->
+
+    <!-- Row 11: Save / Cancel -->
     <HBox spacing="10" alignment="CENTER_RIGHT"
-          GridPane.rowIndex="10" GridPane.columnIndex="1">
+          GridPane.rowIndex="11" GridPane.columnIndex="1">
         <Button text="Save"   onAction="#onSave"/>
         <Button text="Cancel" onAction="#onCancel"/>
     </HBox>
 </GridPane>
+
 

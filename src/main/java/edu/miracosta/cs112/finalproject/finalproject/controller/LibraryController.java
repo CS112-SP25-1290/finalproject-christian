@@ -1,28 +1,26 @@
 package edu.miracosta.cs112.finalproject.finalproject.controller;
 
-import edu.miracosta.cs112.finalproject.finalproject.model.DigitalGame;
 import edu.miracosta.cs112.finalproject.finalproject.model.Game;
-import edu.miracosta.cs112.finalproject.finalproject.model.PhysicalGame;
-
+import edu.miracosta.cs112.finalproject.finalproject.util.FileHelper;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.scene.Parent;
-import javafx.stage.Window;
+
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
-
+import java.util.List;
 
 public class LibraryController {
-
     @FXML private TextField searchField;
     @FXML private TableView<Game> gameTable;
     @FXML private TableColumn<Game, String> titleColumn;
@@ -37,15 +35,15 @@ public class LibraryController {
     @FXML private Button editButton;
     @FXML private Button deleteButton;
 
-    private final ObservableList<Game> masterData   = FXCollections.observableArrayList();
-    private       FilteredList<Game> filteredData;
+    private final ObservableList<Game> masterData = FXCollections.observableArrayList();
+    private FilteredList<Game> filteredData;
 
-    public static LibraryController INSTANCE;
+    private static final File DATA_FILE =
+            new File(System.getProperty("user.home"), "games.json");
 
     @FXML
     public void initialize() {
-        INSTANCE = this;
-        // 1) wire up columns
+        // 1) Wire up columns
         titleColumn       .setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getTitle()));
         consoleColumn     .setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getConsole()));
         genresColumn      .setCellValueFactory(cd -> new SimpleStringProperty(
@@ -63,39 +61,52 @@ public class LibraryController {
         marketValueColumn .setCellValueFactory(cd -> new SimpleDoubleProperty(
                 cd.getValue().getMarketValue()).asObject());
 
-        // 2) sample data
-        masterData.addAll(
-                new DigitalGame(
-                        "Hades",
-                        "PC",
-                        Arrays.asList("Action", "Rogue-like"),
-                        LocalDate.of(2020, 9, 17),
-                        false,
-                        "https://example.com/hades.jpg",
-                        25.00,
-                        30.00,
-                        "https://store.steampowered.com/app/1145360/Hades/"
-                ),
-                new PhysicalGame(
-                        "Super Mario Bros",
-                        "NES",
-                        Arrays.asList("Platformer"),
-                        LocalDate.of(1985, 9, 13),
-                        true,
-                        "/images/mario.jpg",
-                        20.00,
-                        75.00
-                )
-        );
+        // 2) Load from disk (or seed if file is empty)
+        masterData.clear();  // prevent duplicates on every launch
+        List<Game> loaded = FileHelper.load(DATA_FILE);
+        if (loaded.isEmpty()) {
+            masterData.addAll(
+                    new Game(
+                            "Hades", "PS5",
+                            Arrays.asList("Action", "Rogue-like"),
+                            LocalDate.of(2020, 9, 17),
+                            10.0,    // hoursPlayed
+                            false,   // completed
+                            false,   // completeCopy
+                            "https://example.com/hades.jpg",
+                            25.00,   // pricePaid
+                            30.00    // marketValue
+                    ),
+                    new Game(
+                            "Gran Turismo", "PS5",
+                            Arrays.asList("Platformer"),
+                            LocalDate.of(2022, 3, 2),
+                            207.0,
+                            false,
+                            true,
+                            "/images/gran-turismo.jpg",
+                            69.99,
+                            75.00
+                    )
+            );
+            // wrap the save in try/catch so initialize() doesn't have to declare IOException
+            try {
+                FileHelper.save(masterData, DATA_FILE);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            masterData.addAll(loaded);
+        }
 
-        // 3) wrap in a FilteredList and bind to the TableView
+        // 3) Wrap in a FilteredList and bind to the TableView
         filteredData = new FilteredList<>(masterData, p -> true);
         gameTable.setItems(filteredData);
 
-        // 4) enable/disable edit+delete based on selection
+        // 4) Enable/disable edit+delete based on selection
         gameTable.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
             boolean has = sel != null;
-            editButton  .setDisable(!has);
+            editButton .setDisable(!has);
             deleteButton.setDisable(!has);
         });
 
@@ -112,23 +123,21 @@ public class LibraryController {
 
     @FXML
     private void onAddGame() throws IOException {
-        FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/fxml/game-form.fxml")
-        );
-        Parent pane = loader.load();            // ← load() returns a Parent (your GridPane)
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/game-form.fxml"));
+        Parent pane = loader.load();
         FormController fc = loader.getController();
 
         Stage dialog = new Stage();
         dialog.initOwner(gameTable.getScene().getWindow());
         dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.setScene(new Scene(pane));      // ← use pane here
+        dialog.setScene(new Scene(pane));
         fc.setDialogStage(dialog);
-
         dialog.showAndWait();
 
         Game newGame = fc.getGameResult();
         if (newGame != null) {
             masterData.add(newGame);
+            FileHelper.save(masterData, DATA_FILE);
         }
     }
 
@@ -137,9 +146,7 @@ public class LibraryController {
         Game sel = gameTable.getSelectionModel().getSelectedItem();
         if (sel == null) return;
 
-        FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/fxml/game-form.fxml")
-        );
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/game-form.fxml"));
         Parent pane = loader.load();
         FormController fc = loader.getController();
 
@@ -149,24 +156,24 @@ public class LibraryController {
         dialog.setScene(new Scene(pane));
         fc.setDialogStage(dialog);
         fc.setGame(sel);
-
         dialog.showAndWait();
-        gameTable.refresh();
 
+        gameTable.refresh();
+        FileHelper.save(masterData, DATA_FILE);
     }
 
-
-
     @FXML
-    private void onDeleteGame() {
+    private void onDeleteGame() throws IOException {
         Game sel = gameTable.getSelectionModel().getSelectedItem();
-        if (sel != null) masterData.remove(sel);
+        if (sel != null) {
+            masterData.remove(sel);
+            FileHelper.save(masterData, DATA_FILE);
+        }
     }
 
     /** Allow external code to access the current game list. */
     public ObservableList<Game> getMasterData() {
         return masterData;
     }
-
 }
 

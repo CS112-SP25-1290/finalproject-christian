@@ -1,6 +1,6 @@
 package edu.miracosta.cs112.finalproject.finalproject.controller;
 
-import edu.miracosta.cs112.finalproject.finalproject.model.*;
+import edu.miracosta.cs112.finalproject.finalproject.model.Game;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
@@ -12,26 +12,25 @@ import java.util.Arrays;
 import java.util.List;
 
 public class FormController {
-    @FXML private TextField   titleField;
-    @FXML private TextField   consoleField;
-    @FXML private TextField   genresField;
-    @FXML private DatePicker  releaseDatePicker;
+    @FXML private TextField    titleField;
+    @FXML private TextField    consoleField;
+    @FXML private TextField    genresField;
+    @FXML private DatePicker   releaseDatePicker;
     @FXML private Spinner<Double> hoursSpinner;
-    @FXML private CheckBox    completedCheck;
-    @FXML private CheckBox    copyCheck;
-    @FXML private TextField   coverPathField;
-    @FXML private TextField   priceField;
-    @FXML private TextField   valueField;
+    @FXML private CheckBox     completedCheck;
+    @FXML private CheckBox     copyCheck;
+    @FXML private TextField    coverPathField;
+    @FXML private TextField    priceField;
+    @FXML private TextField    valueField;
+    // no storeUrlField any more
 
     private Stage dialogStage;
-    private Game  gameResult;   // will hold the new/edited game
+    private Game  gameResult;
 
-    /** Called by LibraryController to set up this dialog. */
     public void setDialogStage(Stage stage) {
         this.dialogStage = stage;
     }
 
-    /** If editing, pre-fill fields from an existing Game. */
     public void setGame(Game game) {
         this.gameResult = game;
         titleField.setText(game.getTitle());
@@ -46,7 +45,6 @@ public class FormController {
         valueField.setText(Double.toString(game.getMarketValue()));
     }
 
-    /** Returns the new or updated Game after Save was clicked. */
     public Game getGameResult() {
         return gameResult;
     }
@@ -63,9 +61,8 @@ public class FormController {
 
     @FXML
     private void onSave() {
-        // collect and validate inputs
-        String title    = titleField.getText().trim();
-        String console  = consoleField.getText().trim();
+        String title   = titleField.getText().trim();
+        String console = consoleField.getText().trim();
         List<String> genres = Arrays.asList(
                 genresField.getText().split("\\s*,\\s*")
         );
@@ -77,9 +74,8 @@ public class FormController {
         double paid    = Double.parseDouble(priceField.getText().trim());
         double value   = Double.parseDouble(valueField.getText().trim());
 
-        // if editing existing, update it else create new Physical or Digital
         if (gameResult != null) {
-
+            // editing
             gameResult.setTitle(title);
             gameResult.setConsole(console);
             gameResult.setGenres(genres);
@@ -90,30 +86,20 @@ public class FormController {
             gameResult.setCoverArtPath(cover);
             gameResult.setPricePaid(paid);
             gameResult.setMarketValue(value);
-            // storeUrl remains unchanged
         } else {
-            // default to PhysicalGame if gameResult was null or Physical
-            PhysicalGame pg = new PhysicalGame(
+            // new
+            gameResult = new Game(
                     title, console, genres, date,
-                    copy,    // completeCopy
-                    cover,   // coverArtPath
-                    paid,    // pricePaid
-                    value    // marketValue
+                    hours, done, copy,
+                    cover, paid, value
             );
-            // now apply the hours & completed flags
-            pg.setHoursPlayed(hours);
-            pg.setCompleted(done);
-            gameResult = pg;
         }
 
         dialogStage.close();
-
     }
-
 
     @FXML
     private void onCancel() {
         dialogStage.close();
     }
 }
-
