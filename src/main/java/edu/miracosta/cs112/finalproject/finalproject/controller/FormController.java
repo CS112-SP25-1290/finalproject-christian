@@ -12,39 +12,82 @@ import java.util.Arrays;
 import java.util.List;
 
 public class FormController {
-    @FXML private TextField    titleField;
-    @FXML private TextField    consoleField;
-    @FXML private TextField    genresField;
-    @FXML private DatePicker   releaseDatePicker;
+    @FXML private TextField      titleField;
+    @FXML private TextField      consoleField;
+    @FXML private TextField      genresField;
+    @FXML private DatePicker     releaseDatePicker;
     @FXML private Spinner<Double> hoursSpinner;
-    @FXML private CheckBox     completedCheck;
-    @FXML private CheckBox     copyCheck;
-    @FXML private TextField    coverPathField;
-    @FXML private TextField    priceField;
-    @FXML private TextField    valueField;
-    // no storeUrlField any more
+    @FXML private CheckBox       completedCheck;
+    @FXML private CheckBox       copyCheck;
+    @FXML private TextField      coverPathField;
+    @FXML private TextField      priceField;
+    @FXML private TextField      valueField;
 
-    private Stage dialogStage;
-    private Game  gameResult;
+    private Stage  dialogStage;
+    private Game   gameResult;
+    private boolean okClicked = false;
 
     public void setDialogStage(Stage stage) {
         this.dialogStage = stage;
     }
 
+    /**
+     * Populate all fields. If any property on game is null,
+     * default to empty or reasonable default.
+     */
     public void setGame(Game game) {
         this.gameResult = game;
-        titleField.setText(game.getTitle());
-        consoleField.setText(game.getConsole());
-        genresField.setText(String.join(", ", game.getGenres()));
-        releaseDatePicker.setValue(game.getReleaseDate());
+
+        // Title & console
+        titleField.setText(game.getTitle() == null ? "" : game.getTitle());
+        consoleField.setText(game.getConsole() == null ? "" : game.getConsole());
+
+        // Genres (guard against null list)
+        List<String> genresList = game.getGenres();
+        genresField.setText(
+                (genresList == null || genresList.isEmpty())
+                        ? ""
+                        : String.join(", ", genresList)
+        );
+
+        // Release date (default to today if null)
+        releaseDatePicker.setValue(
+                game.getReleaseDate() == null
+                        ? LocalDate.now()
+                        : game.getReleaseDate()
+        );
+
+        // Hours played (Spinner should have a default factory set in FXML)
         hoursSpinner.getValueFactory().setValue(game.getHoursPlayed());
+
+        // Completed / copy
         completedCheck.setSelected(game.isCompleted());
         copyCheck.setSelected(game.isCompleteCopy());
-        coverPathField.setText(game.getCoverArtPath());
-        priceField.setText(Double.toString(game.getPricePaid()));
-        valueField.setText(Double.toString(game.getMarketValue()));
+
+        // Cover path
+        coverPathField.setText(
+                game.getCoverArtPath() == null ? "" : game.getCoverArtPath()
+        );
+
+        // Price and market value (empty if zero)
+        priceField.setText(
+                game.getPricePaid() != 0.0
+                        ? Double.toString(game.getPricePaid())
+                        : ""
+        );
+        valueField.setText(
+                game.getMarketValue() != 0.0
+                        ? Double.toString(game.getMarketValue())
+                        : ""
+        );
     }
 
+    /** Was the Save button clicked? */
+    public boolean isOkClicked() {
+        return okClicked;
+    }
+
+    /** After Save, retrieve the updated/created Game */
     public Game getGameResult() {
         return gameResult;
     }
@@ -61,21 +104,26 @@ public class FormController {
 
     @FXML
     private void onSave() {
+        // Read values (all fields are non-null now)
         String title   = titleField.getText().trim();
         String console = consoleField.getText().trim();
         List<String> genres = Arrays.asList(
                 genresField.getText().split("\\s*,\\s*")
         );
-        LocalDate date = releaseDatePicker.getValue();
-        double hours   = hoursSpinner.getValue();
-        boolean done   = completedCheck.isSelected();
-        boolean copy   = copyCheck.isSelected();
-        String cover   = coverPathField.getText().trim();
-        double paid    = Double.parseDouble(priceField.getText().trim());
-        double value   = Double.parseDouble(valueField.getText().trim());
+        LocalDate date     = releaseDatePicker.getValue();
+        double    hours    = hoursSpinner.getValue();
+        boolean   done     = completedCheck.isSelected();
+        boolean   copy     = copyCheck.isSelected();
+        String    cover    = coverPathField.getText().trim();
+        double    paid     = priceField.getText().isEmpty()
+                ? 0.0
+                : Double.parseDouble(priceField.getText().trim());
+        double    value    = valueField.getText().isEmpty()
+                ? 0.0
+                : Double.parseDouble(valueField.getText().trim());
 
         if (gameResult != null) {
-            // editing
+            // editing existing
             gameResult.setTitle(title);
             gameResult.setConsole(console);
             gameResult.setGenres(genres);
@@ -87,7 +135,7 @@ public class FormController {
             gameResult.setPricePaid(paid);
             gameResult.setMarketValue(value);
         } else {
-            // new
+            // creating new game
             gameResult = new Game(
                     title, console, genres, date,
                     hours, done, copy,
@@ -95,11 +143,14 @@ public class FormController {
             );
         }
 
+        okClicked = true;
         dialogStage.close();
     }
 
     @FXML
     private void onCancel() {
+        okClicked = false;
         dialogStage.close();
     }
 }
+

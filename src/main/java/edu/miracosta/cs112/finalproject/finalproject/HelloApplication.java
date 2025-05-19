@@ -1,6 +1,6 @@
 package edu.miracosta.cs112.finalproject.finalproject;
 
-import edu.miracosta.cs112.finalproject.finalproject.controller.MainController;
+import edu.miracosta.cs112.finalproject.finalproject.controller.LibraryController;
 import edu.miracosta.cs112.finalproject.finalproject.model.Game;
 import edu.miracosta.cs112.finalproject.finalproject.util.FileHelper;
 import javafx.application.Application;
@@ -13,13 +13,13 @@ import java.io.File;
 import java.util.List;
 
 public class HelloApplication extends Application {
-    private MainController controller;
+    private LibraryController controller;
     private File dataFile;
 
     @Override
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/fxml/main.fxml")
+                getClass().getResource("/fxml/library-view.fxml")
         );
         Parent root = loader.load();
 

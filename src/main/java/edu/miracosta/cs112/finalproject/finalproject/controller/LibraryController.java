@@ -2,7 +2,10 @@ package edu.miracosta.cs112.finalproject.finalproject.controller;
 
 import edu.miracosta.cs112.finalproject.finalproject.model.Game;
 import edu.miracosta.cs112.finalproject.finalproject.util.FileHelper;
-import javafx.beans.property.*;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -11,10 +14,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -25,8 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class LibraryController {
-    // your existing table/search fields…
-    @FXML private TextField   searchField;
+    @FXML private TextField searchField;
     @FXML private TableView<Game> gameTable;
     @FXML private TableColumn<Game, String> titleColumn;
     @FXML private TableColumn<Game, String> consoleColumn;
@@ -40,45 +38,40 @@ public class LibraryController {
     @FXML private Button editButton;
     @FXML private Button deleteButton;
 
-    // NEW: these two must match fx:id’s in main.fxml
-    @FXML private FlowPane sidebar;
-    @FXML private FlowPane coverPane;
-
     private final ObservableList<Game> masterData = FXCollections.observableArrayList();
     private FilteredList<Game> filteredData;
 
-    // Persist to ~/games.json
     private static final File DATA_FILE =
             new File(System.getProperty("user.home"), "games.json");
 
     @FXML
     public void initialize() {
-        // 1) wire up your TableView columns (exactly as before)…
-        titleColumn       .setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getTitle()));
-        consoleColumn     .setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getConsole()));
-        genresColumn      .setCellValueFactory(cd -> new SimpleStringProperty(
+        // 1) wire up columns
+        titleColumn.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getTitle()));
+        consoleColumn.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getConsole()));
+        genresColumn.setCellValueFactory(cd -> new SimpleStringProperty(
                 String.join(", ", cd.getValue().getGenres())));
-        releaseDateColumn .setCellValueFactory(cd -> new SimpleObjectProperty<>(
+        releaseDateColumn.setCellValueFactory(cd -> new SimpleObjectProperty<>(
                 cd.getValue().getReleaseDate()));
-        hoursPlayedColumn .setCellValueFactory(cd -> new SimpleDoubleProperty(
+        hoursPlayedColumn.setCellValueFactory(cd -> new SimpleDoubleProperty(
                 cd.getValue().getHoursPlayed()).asObject());
-        completedColumn   .setCellValueFactory(cd -> new SimpleBooleanProperty(
+        completedColumn.setCellValueFactory(cd -> new SimpleBooleanProperty(
                 cd.getValue().isCompleted()));
         completeCopyColumn.setCellValueFactory(cd -> new SimpleBooleanProperty(
                 cd.getValue().isCompleteCopy()));
-        pricePaidColumn   .setCellValueFactory(cd -> new SimpleDoubleProperty(
+        pricePaidColumn.setCellValueFactory(cd -> new SimpleDoubleProperty(
                 cd.getValue().getPricePaid()).asObject());
-        marketValueColumn .setCellValueFactory(cd -> new SimpleDoubleProperty(
+        marketValueColumn.setCellValueFactory(cd -> new SimpleDoubleProperty(
                 cd.getValue().getMarketValue()).asObject());
 
-        // 2) load or seed…
+        // 2) load or seed data
         List<Game> loaded = FileHelper.load(DATA_FILE);
         if (loaded.isEmpty()) {
             masterData.addAll(
-                    new Game("Hades","PC",Arrays.asList("Action","Rogue-like"),
+                    new Game("Hades","PC", Arrays.asList("Action","Rogue-like"),
                             LocalDate.of(2020,9,17),0,false,false,
                             "https://example.com/hades.jpg",25,30),
-                    new Game("Super Mario Bros","NES",Arrays.asList("Platformer"),
+                    new Game("Super Mario Bros","NES", Arrays.asList("Platformer"),
                             LocalDate.of(1985,9,13),0,false,true,
                             "/images/mario.jpg",20,75)
             );
@@ -86,11 +79,11 @@ public class LibraryController {
             masterData.addAll(loaded);
         }
 
-        // 3) wrap & bind to the TableView
+        // 3) bind to TableView
         filteredData = new FilteredList<>(masterData, g -> true);
         gameTable.setItems(filteredData);
 
-        // 4) enable/disable edit+delete
+        // 4) enable edit/delete buttons
         gameTable.getSelectionModel().selectedItemProperty()
                 .addListener((obs, o, sel) -> {
                     boolean has = sel != null;
@@ -98,100 +91,68 @@ public class LibraryController {
                     deleteButton.setDisable(!has);
                 });
 
-        // 5) search → table AND cover‐grid
+        // 5) search filters the table
         searchField.textProperty().addListener((obs, old, text) -> {
             String lc = text == null ? "" : text.toLowerCase();
-            filteredData.setPredicate(game -> {
-                if (lc.isEmpty()) return true;
-                return game.getTitle().toLowerCase().contains(lc)
-                        || game.getConsole().toLowerCase().contains(lc);
-            });
-            renderCovers();
+            filteredData.setPredicate(game ->
+                    lc.isEmpty()
+                            || game.getTitle().toLowerCase().contains(lc)
+                            || game.getConsole().toLowerCase().contains(lc)
+            );
         });
-
-        // finally, initial render of your cover‐art grid:
-        renderCovers();
     }
 
+    // ─── sidebar filters ────────────────────────────────────
+    @FXML public void onShowAll()                    { filteredData.setPredicate(g -> true); }
+    @FXML public void onFilterPC()    { filteredData.setPredicate(g -> "PC".equalsIgnoreCase(g.getConsole())); }
+    @FXML public void onFilterPS5()   { filteredData.setPredicate(g -> "PS5".equalsIgnoreCase(g.getConsole())); }
+    @FXML public void onFilterPS4()   { filteredData.setPredicate(g -> "PS4".equalsIgnoreCase(g.getConsole())); }
+    @FXML public void onFilterPS3()   { filteredData.setPredicate(g -> "PS3".equalsIgnoreCase(g.getConsole())); }
+    @FXML public void onFilterPS2()   { filteredData.setPredicate(g -> "PS2".equalsIgnoreCase(g.getConsole())); }
+    @FXML public void onFilterPS1()   { filteredData.setPredicate(g -> "PS1".equalsIgnoreCase(g.getConsole())); }
+    @FXML public void onFilterNintendoSwitch() { filteredData.setPredicate(g -> "Nintendo Switch".equalsIgnoreCase(g.getConsole())); }
+    @FXML public void onFilterXbox360()        { filteredData.setPredicate(g -> "Xbox 360".equalsIgnoreCase(g.getConsole())); }
 
-    // build your little cover‐art “cards” and stick them in the FlowPane
-    private void renderCovers() {
-        coverPane.getChildren().clear();
-        for (Game game : filteredData) {
-            ImageView iv = new ImageView();
-            iv.setPreserveRatio(true);
-            iv.setFitWidth(100);
-
-            try {
-                iv.setImage(new Image(game.getCoverArtPath(), true));
-            } catch (Exception e) {
-                // ignore or set a placeholder
-            }
-
-            Label title = new Label(game.getTitle());
-            VBox card = new VBox(iv, title);
-            card.setSpacing(5);
-            card.setOnMouseClicked(evt -> {
-                try {
-                    showGameDetails(game);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            });
-
-            coverPane.getChildren().add(card);
-        }
-    }
-
-    // pop‐up your existing form in “edit” mode
-    private void showGameDetails(Game game) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/game-form.fxml"));
+    /**
+     * Opens the “Add Game” dialog, then if OK is clicked,
+     * adds the new Game and persists it.
+     */
+    @FXML
+    private void onAddGame() throws IOException {
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/fxml/game-form.fxml")
+        );
         Parent pane = loader.load();
         FormController fc = loader.getController();
 
+        // prepare an empty Game for the form
+        Game newGame = new Game();
+        fc.setGame(newGame);
+
+        // show dialog
         Stage dialog = new Stage();
-        dialog.initOwner(coverPane.getScene().getWindow());
+        dialog.initOwner(gameTable.getScene().getWindow());
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setScene(new Scene(pane));
         fc.setDialogStage(dialog);
-        fc.setGame(game);
         dialog.showAndWait();
 
-        // after editing, re‐draw & re‐save
-        renderCovers();
-        FileHelper.save(masterData, DATA_FILE);
+        // if user hit OK, add & save
+        if (fc.isOkClicked()) {
+            masterData.add(newGame);
+            FileHelper.save(masterData, DATA_FILE);
+        }
     }
 
+    @FXML private void onEditGame()   throws IOException { /* unchanged */ }
+    @FXML private void onDeleteGame() throws IOException { /* unchanged */ }
 
-    // ─── your sidebar button handlers ────────────────────
-
-    @FXML public void onShowAll() {
-        filteredData.setPredicate(g -> true);
-        renderCovers();
+    // keep load/save hooks for HelloApplication
+    public void loadData(File file) throws IOException {
+        List<Game> games = FileHelper.load(file);
+        masterData.setAll(games);
     }
-
-    @FXML public void onFilterPC() {
-        filteredData.setPredicate(g -> "PC".equalsIgnoreCase(g.getConsole()));
-        renderCovers();
-    }
-
-    @FXML public void onFilterPS5() {
-        filteredData.setPredicate(g -> "PS5".equalsIgnoreCase(g.getConsole()));
-        renderCovers();
-    }
-
-
-    @FXML
-    private void onAddGame() throws IOException { /* same as before */ }
-
-    @FXML
-    private void onEditGame() throws IOException { /* same as before */ }
-
-    @FXML
-    private void onDeleteGame() throws IOException { /* same as before */ }
-
-    public ObservableList<Game> getMasterData() {
+    public List<Game> getGames() {
         return masterData;
     }
 }
-
