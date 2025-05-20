@@ -39,7 +39,8 @@
                 <TableColumn fx:id="completedColumn"    prefWidth="80.0"  text="Completed"/>
                 <TableColumn fx:id="completeCopyColumn" prefWidth="100.0" text="Complete Copy"/>
                 <TableColumn fx:id="pricePaidColumn"    prefWidth="80.0"  text="Price Paid"/>
-                <TableColumn fx:id="marketValueColumn"  prefWidth="102.0" text="Price Charting Value"/>
+                <TableColumn fx:id="marketValueColumn"  prefWidth="102.0" text="Price Charting"/>
+                <TableColumn fx:id="getProfitColumn"    prefWidth="80.0"  text="Profit"/>
             </columns>
         </TableView>
     </center>
@@ -58,7 +59,9 @@
             <Button text="PS2"                    onAction="#onFilterPS2"             maxWidth="Infinity"/>
             <Button text="PS1"                    onAction="#onFilterPS1"             maxWidth="Infinity"/>
             <Button text="Nintendo Switch"        onAction="#onFilterNintendoSwitch"  maxWidth="Infinity"/>
+            <Button text="Nintendo DS"            onAction="#onFilterNintendoSwitch"  maxWidth="Infinity"/>
             <Button text="Xbox 360"               onAction="#onFilterXbox360"         maxWidth="Infinity"/>
+
         </VBox>
     </left>
 

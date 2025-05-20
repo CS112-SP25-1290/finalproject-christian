@@ -1,6 +1,8 @@
 package edu.miracosta.cs112.finalproject.finalproject.controller;
 
 import edu.miracosta.cs112.finalproject.finalproject.model.Game;
+import edu.miracosta.cs112.finalproject.finalproject.persistence.DataStore;
+import edu.miracosta.cs112.finalproject.finalproject.util.DataLoadException;
 import edu.miracosta.cs112.finalproject.finalproject.util.FileHelper;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -9,7 +11,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.TilePane;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,12 +22,22 @@ public class MainController {
     @FXML private TilePane coverTilePane;
 
     private List<Game> allGames;
+    private final DataStore dataStore = new FileHelper();
 
     /** Called once from HelloApplication.start(...) */
     public void loadData(File dataFile) {
-        allGames = FileHelper.load(dataFile);
-        populateCovers(allGames);
+        try {
+            FileHelper helper = new FileHelper();
+            allGames = helper.load(dataFile);
+
+            populateCovers(allGames);
+        } catch (DataLoadException e) {
+            e.printStackTrace();
+            // Optional: show an error dialog here if you'd like
+        }
     }
+
+
 
     /** Expose for saving on exit */
     public List<Game> getGames() {
@@ -84,7 +98,8 @@ public class MainController {
     }
 
     private void showGameDetails(Game game) {
-        // TODO: your detail-popup or side-panel code here
+        // TODO: detail-popup or side-panel code here
         System.out.println("Clicked on: " + game.getTitle());
     }
 }
+

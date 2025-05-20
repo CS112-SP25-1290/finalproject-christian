@@ -31,10 +31,6 @@ public class FormController {
         this.dialogStage = stage;
     }
 
-    /**
-     * Populate all fields. If any property on game is null,
-     * default to empty or reasonable default.
-     */
     public void setGame(Game game) {
         this.gameResult = game;
 
@@ -42,7 +38,7 @@ public class FormController {
         titleField.setText(game.getTitle() == null ? "" : game.getTitle());
         consoleField.setText(game.getConsole() == null ? "" : game.getConsole());
 
-        // Genres (guard against null list)
+        // Genres
         List<String> genresList = game.getGenres();
         genresField.setText(
                 (genresList == null || genresList.isEmpty())
@@ -57,7 +53,7 @@ public class FormController {
                         : game.getReleaseDate()
         );
 
-        // Hours played (Spinner should have a default factory set in FXML)
+        // Hours played
         hoursSpinner.getValueFactory().setValue(game.getHoursPlayed());
 
         // Completed / copy
@@ -82,12 +78,12 @@ public class FormController {
         );
     }
 
-    /** Was the Save button clicked? */
+    // Was the Save button clicked? */
     public boolean isOkClicked() {
         return okClicked;
     }
 
-    /** After Save, retrieve the updated/created Game */
+    // After Save, retrieve the updated/created Game */
     public Game getGameResult() {
         return gameResult;
     }
